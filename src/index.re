@@ -1,9 +1,13 @@
-let context = Canvas.getContext2d "canvas";
-let width = 1900.0;
-let height = 1060.0;
+let canvas = Canvas.getCanvasById "canvas";
+let canvasParent = Canvas.parentNode canvas;
+Canvas.setWidth canvas (Canvas.clientWidth canvasParent);
+Canvas.setHeight canvas (Canvas.clientHeight canvasParent);
+let context = Canvas.getContext canvas `twoD;
+let width = float_of_int @@ Canvas.getWidth canvas;
+let height = float_of_int @@ Canvas.getHeight canvas;
+let center = (width /. 2., height /. 2.);
 
-let gravity = Vector2.mul Vector2.down 0.0092;
-let theOG = (width /. 2.0, height /. 2.0);
+let gravity = Vector2.mul Vector2.down 0.015;
 
 module Particle = {
     type t = {
@@ -16,48 +20,46 @@ module Particle = {
         { position, velocity, colour };
     };
 
-    let draw { position, colour } => {
-        Canvas.drawCircle ::colour context position 3.0
+    let draw context { position, colour } => {
+        Canvas.drawCircle context colour::colour center::position 5.0;
     };
 
     let update { position, velocity, colour } => {
-        let v = Vector2.add velocity gravity;
-        let p = Vector2.add position v;
-        { position: p, velocity: v, colour }
+        let newVelocity = Vector2.add velocity gravity;
+        { position: Vector2.add position newVelocity, velocity: newVelocity, colour }
     };
 };
 
-let particle = Particle.make theOG (10.0, 0.0);
+type state = list Particle.t;
 
-let state = ref [];
- 
-type message = 
+let state : ref state = ref [];
+
+type msg = 
   | Tick
-  | SpawnParticle Vector2.t;
+  | SpawnParticle Vector2.t Vector2.t;
 
-let update state message => {
-    switch message {
-        | Tick => {
-            List.map Particle.update state;
+let update msg state => {
+    switch msg {
+        | Tick => List.map Particle.update state
+        | SpawnParticle pos vel => {
+            let colour = (Random.int 256,Random.int 256, Random.int 256);
+            [Particle.make pos vel colour, ...state]
         }
-        | SpawnParticle pos => {
-            let colour = (Random.int 256, Random.int 256, Random.int 256);
-            [Particle.make pos (Vector2.randomUnit ()) colour, ...state];
-        };
     };
 };
 
-let render state => {
-    /* Canvas.clearCanvas context; */
-    List.iter Particle.draw state;
+let draw state => {
+    Canvas.clearCanvas canvas context;
+    List.iter (Particle.draw context) state;
 };
 
-let dispatch message => {
-    state := update !state message;
-    render !state;
+let dispatch msg => {
+    let newState = update msg !state;
+    state := newState;
+    draw !state;
 };
 
 external setInterval : (unit => unit) => int => unit = "setInterval" [@@bs.val];
 
-setInterval (fun () => dispatch Tick) 17;
-setInterval (fun () => dispatch (SpawnParticle theOG)) 20;
+setInterval (fun () => dispatch Tick) 10;
+setInterval (fun () => dispatch (SpawnParticle center (Vector2.randomUnit ()))) 100;
