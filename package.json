@@ -1,22 +1,18 @@
 {
-  "name": "reasonmlcph",
+  "name": "reasonmlcph-particles",
   "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "p5": "^0.5.14",
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
-    "reason-scripts": "0.6.9"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
-    "prepare": "npm link bs-platform"
+    "build:reason": "bsb -make-world -clean-world",
+    "build:webpack": "webpack",
+    "watch:reason": "bsb -make-world -clean-world -w",
+    "watch:webpack": "webpack-dev-server --content-base public/",
+    "clean": "bsb -clean-world"
   },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "license": "MIT",
   "devDependencies": {
-    "bs-jest": "^0.1.0",
-    "reason-react": "^0.2.4"
+    "bs-platform": "2.0.0"
   }
 }
