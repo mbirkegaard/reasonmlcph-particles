@@ -13,6 +13,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "2.0.0"
+    "bs-platform": "2.0.0",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.4"
   }
 }
